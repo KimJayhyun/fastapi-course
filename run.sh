@@ -1,3 +1,3 @@
 source .venv/bin/activate
 
-uvicorn TodoApp.main:app --reload
+PYTHONPATH=./TodoApp uvicorn TodoApp.main:app --reload
