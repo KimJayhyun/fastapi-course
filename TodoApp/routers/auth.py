@@ -48,10 +48,12 @@ def authenticate_user(username: str, password: str, db: Session):
     return user
 
 
-def create_access_token(username: str, user_id: int, expires_delta: timedelta = None):
+def create_access_token(
+    username: str, user_id: int, role: str, expires_delta: timedelta = None
+):
     expires = datetime.now(timezone.utc) + expires_delta
 
-    encode = {"sub": username, "id": user_id, "exp": expires}
+    encode = {"sub": username, "id": user_id, "role": role, "exp": expires}
 
     return jwt.encode(encode, SECRET_KEY, algorithm=ALGORITHM)
 
@@ -62,6 +64,7 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)]):
 
         username: str = payload.get("sub")
         user_id: int = payload.get("id")
+        user_role: str = payload.get("role")
 
         if username is None or user_id is None:
             raise HTTPException(
@@ -69,7 +72,7 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)]):
                 detail="Could not validate user.",
             )
 
-        return {"username": username, "id": user_id}
+        return {"username": username, "id": user_id, "role": user_role}
 
     except JWTError:
         raise HTTPException(
@@ -115,6 +118,8 @@ async def login_for_access_token(
             detail="Could not validate user.",
         )
 
-    token = create_access_token(form_data.username, user.id, timedelta(minutes=20))
+    token = create_access_token(
+        user.username, user.id, user.role, timedelta(minutes=20)
+    )
 
     return {"access_token": token, "token_type": "bearer"}
