@@ -1,6 +1,6 @@
 from typing import Annotated
 
-import database
+from database import get_db
 from fastapi import APIRouter, Depends, HTTPException
 from models import Users
 from passlib.context import CryptContext
@@ -10,14 +10,6 @@ from sqlalchemy.orm import Session
 from starlette import status
 
 router = APIRouter(prefix="/user", tags=["user"])
-
-
-def get_db():
-    db = database.SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
