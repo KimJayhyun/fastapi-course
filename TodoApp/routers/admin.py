@@ -1,6 +1,6 @@
 from typing import Annotated
 
-import database
+from database import get_db
 from fastapi import APIRouter, Depends, HTTPException, Path
 from models import Todos
 from pydantic import BaseModel, Field
@@ -11,19 +11,11 @@ from starlette import status
 router = APIRouter(prefix="/admin", tags=["admin"])
 
 
-def get_db():
-    db = database.SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
 db_dependency = Annotated[Session, Depends(get_db)]
 user_dependency = Annotated[dict, Depends(get_current_user)]
 
 
-@router.get("todo", status_code=status.HTTP_200_OK)
+@router.get("/todo", status_code=status.HTTP_200_OK)
 async def read_all(user: user_dependency, db: db_dependency):
     if user is None or user.get("role") != "admin":
         raise HTTPException(

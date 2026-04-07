@@ -1,6 +1,6 @@
 from typing import Annotated
 
-import database
+from database import get_db
 from fastapi import APIRouter, Depends, HTTPException, Path
 from models import Todos
 from pydantic import BaseModel, Field
@@ -9,14 +9,6 @@ from sqlalchemy.orm import Session
 from starlette import status
 
 router = APIRouter(tags=["todo"])
-
-
-def get_db():
-    db = database.SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 db_dependency = Annotated[Session, Depends(get_db)]
